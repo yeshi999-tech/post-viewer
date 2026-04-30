@@ -1,5 +1,112 @@
 @import "tailwindcss";
 
+:root {
+    color-scheme: dark;
+    --bg: #0f172a;
+    --surface: rgba(15, 23, 42, 0.55);
+    --surface-strong: rgba(15, 23, 42, 0.72);
+    --surface-muted: #0f172a;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --accent: #60a5fa;
+    --accent-rgb: 96, 165, 250;
+    --accent-strong: #a78bfa;
+    --border: rgba(148, 163, 184, 0.35);
+    --input-bg: #111827;
+    --input-border: #334155;
+    --input-placeholder: #64748b;
+    --shadow: rgba(96, 165, 250, 0.15);
+}
+
+.light {
+    color-scheme: light;
+    --bg: #f8fafc;
+    --surface: rgba(255, 255, 255, 0.88);
+    --surface-strong: rgba(248, 250, 252, 0.95);
+    --surface-muted: #e2e8f0;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --accent: #2563eb;
+    --accent-rgb: 37, 99, 235;
+    --accent-strong: #7c3aed;
+    --border: rgba(148, 163, 184, 0.6);
+    --input-bg: #ffffff;
+    --input-border: #cbd5e1;
+    --input-placeholder: #94a3b8;
+    --shadow: rgba(37, 99, 235, 0.14);
+}
+
+html,
+body {
+    min-height: 100%;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+body {
+    margin: 0;
+    background: linear-gradient(135deg, var(--bg), var(--surface-muted));
+    color: var(--text);
+}
+
+.bg-page {
+    background: linear-gradient(135deg, var(--bg), var(--surface-muted));
+}
+
+.bg-surface {
+    background-color: var(--surface);
+}
+
+.bg-surface-strong {
+    background-color: var(--surface-strong);
+}
+
+.text-primary {
+    color: var(--text);
+}
+
+.text-secondary {
+    color: var(--text-muted);
+}
+
+.text-accent {
+    color: var(--accent);
+}
+
+.text-accent-strong {
+    color: var(--accent-strong);
+}
+
+.border-surface {
+    border-color: var(--border);
+}
+
+.input-surface {
+    background-color: var(--input-bg);
+    color: var(--text);
+}
+
+.input-surface::placeholder {
+    color: var(--input-placeholder);
+    opacity: 1;
+}
+
+.button-surface {
+    background-color: var(--surface);
+    color: var(--text);
+}
+
+.button-surface:hover {
+    background-color: var(--surface-strong);
+}
+
+.bg-accent-soft {
+    background-color: rgba(var(--accent-rgb), 0.16);
+}
+
+.shadow-accent-soft {
+    box-shadow: 0 30px 60px -32px var(--shadow);
+}
+
 @keyframes fadeInUp {
     from {
         opacity: 0;

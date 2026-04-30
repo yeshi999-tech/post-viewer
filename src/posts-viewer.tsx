@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import LoadingSpinner from "./loading-spinner";
 
 type Post = Readonly<{
@@ -24,6 +24,18 @@ type Author = Readonly<{
 }>;
 
 export function PostViewer() {
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        if (typeof window === "undefined") {
+            return true;
+        }
+
+        const savedTheme = window.localStorage.getItem("theme");
+        if (savedTheme === "light") return false;
+        if (savedTheme === "dark") return true;
+
+        return window.matchMedia("(prefers-color-scheme: dark)").matches;
+    });
+
     const [posts, setPosts] = useState<Post[]>([]);
     const [selectedPost, setSelectedPost] = useState<Post | null>(null);
     const [comments, setComments] = useState<Comment[]>([]);
@@ -34,6 +46,12 @@ export function PostViewer() {
     const [postsLoading, setPostsLoading] = useState(true);
     const [authorLoading, setAuthorLoading] = useState(false);
     const [commentsLoading, setCommentsLoading] = useState(false);
+
+    useEffect(() => {
+        const root = document.documentElement;
+        root.classList.toggle("light", !isDarkMode);
+        window.localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+    }, [isDarkMode]);
 
     const fetchPosts = async () => {
         try {
@@ -102,25 +120,37 @@ export function PostViewer() {
     // Initial page loader (only for posts)
     if (postsLoading) {
         return (
-            <div className="flex min-h-[400px] items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+            <div className="flex min-h-[400px] items-center justify-center bg-page">
                 <LoadingSpinner size="lg" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+        <div className="min-h-screen bg-page">
             <div className="flex h-screen max-w-7xl mx-auto">
                 {/* Sidebar */}
-                <div className="w-96 flex flex-col bg-gray-900/50 backdrop-blur-sm border-r border-gray-700">
+                <div className="w-96 flex flex-col bg-surface backdrop-blur-sm border-r border-surface">
                     {/* Header */}
-                    <div className="p-4 border-b border-gray-700 bg-gray-800/50">
-                        <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                            📝 Post Explorer
-                        </h1>
-                        <p className="text-xs text-gray-400 mt-1">
-                            Discover amazing stories
-                        </p>
+                    <div className="p-4 border-b border-surface bg-surface-strong">
+                        <div className="flex items-start justify-between gap-4 flex-wrap">
+                            <div>
+                                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                                    📝 Post Explorer
+                                </h1>
+                                <p className="text-xs text-secondary mt-1">
+                                    Discover amazing stories
+                                </p>
+                            </div>
+
+                            <button
+                                onClick={() => setIsDarkMode((prev) => !prev)}
+                                className="button-surface inline-flex items-center gap-2 rounded-2xl border border-surface px-3 py-2 text-sm font-medium transition"
+                                aria-label="Toggle light and dark mode"
+                            >
+                                {isDarkMode ? "☀️ Light" : "🌙 Dark"} Mode
+                            </button>
+                        </div>
                     </div>
 
                     {/* Search */}
@@ -129,7 +159,7 @@ export function PostViewer() {
                             <input
                                 type="text"
                                 placeholder="🔍 Search by title..."
-                                className="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-gray-200 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                className="w-full p-3 input-surface border border-surface rounded-xl text-primary placeholder:text-secondary focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[rgba(var(--accent-rgb),0.2)] transition-all"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
@@ -139,7 +169,7 @@ export function PostViewer() {
                     {/* Posts List */}
                     <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2">
                         {filteredPosts.length === 0 ? (
-                            <div className="text-center py-8 text-gray-500">
+                            <div className="text-center py-8 text-secondary">
                                 No posts found
                             </div>
                         ) : (
@@ -149,12 +179,12 @@ export function PostViewer() {
                                     onClick={() => setSelectedPost(p)}
                                     className={`cursor-pointer p-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] ${
                                         selectedPost?.id === p.id
-                                            ? "bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/50 shadow-lg shadow-blue-500/10"
-                                            : "bg-gray-800/50 hover:bg-gray-800 border border-gray-700 hover:border-gray-600"
+                                            ? "bg-accent-soft border border-surface shadow-accent-soft"
+                                            : "bg-surface hover:bg-surface-strong border border-surface"
                                     }`}
                                 >
-                                    <h3 className="text-sm font-semibold text-gray-200 leading-tight line-clamp-2">
-                                        <span className="text-blue-400">#{p.id}</span> {p.title}
+                                    <h3 className="text-sm font-semibold text-primary leading-tight line-clamp-2">
+                                        <span className="text-accent">#{p.id}</span> {p.title}
                                     </h3>
                                 </div>
                             ))
@@ -163,19 +193,19 @@ export function PostViewer() {
                 </div>
 
                 {/* Detail panel */}
-                <div className="flex-1 overflow-y-auto bg-gray-900/30">
+                <div className="flex-1 overflow-y-auto bg-surface">
                     {!selectedPost ? (
-                        <div className="h-full flex flex-col items-center justify-center text-gray-500">
+                        <div className="h-full flex flex-col items-center justify-center text-secondary">
                             <div className="text-6xl mb-4">📖</div>
-                            <p className="text-lg">Select a post to read</p>
-                            <p className="text-sm text-gray-600 mt-2">Click on any post from the list</p>
+                            <p className="text-lg text-primary">Select a post to read</p>
+                            <p className="text-sm text-secondary mt-2">Click on any post from the list</p>
                         </div>
                     ) : (
                         <div className="max-w-3xl mx-auto p-8">
                             {/* Back Button */}
                             <button
                                 onClick={() => setSelectedPost(null)}
-                                className="group mb-6 flex items-center gap-2 text-sm text-gray-400 hover:text-blue-400 transition-colors"
+                                className="group mb-6 flex items-center gap-2 text-sm text-secondary hover:text-accent transition-colors"
                             >
                                 <svg className="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -184,16 +214,16 @@ export function PostViewer() {
                             </button>
 
                             {/* Post Content */}
-                            <article className="bg-gray-800/50 rounded-2xl border border-gray-700 overflow-hidden backdrop-blur-sm">
+                            <article className="bg-surface rounded-2xl border border-surface overflow-hidden backdrop-blur-sm">
                                 {/* Post Header */}
-                                <div className="p-6 border-b border-gray-700 bg-gradient-to-r from-gray-800 to-gray-800/50">
+                                <div className="p-6 border-b border-surface bg-surface-strong">
                                     <div className="flex justify-between items-start gap-4 flex-wrap">
-                                        <h2 className="text-2xl md:text-3xl font-bold text-gray-100 leading-tight flex-1">
+                                        <h2 className="text-2xl md:text-3xl font-bold text-primary leading-tight flex-1">
                                             {selectedPost.title}
                                         </h2>
 
-                                        <div className="bg-gray-900/50 rounded-xl p-3 min-w-[150px]">
-                                            <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">
+                                        <div className="bg-surface rounded-xl p-3 min-w-[150px]">
+                                            <p className="text-xs text-secondary uppercase tracking-wider mb-1">
                                                 ✍️ Author
                                             </p>
                                             {authorLoading ? (
@@ -202,10 +232,10 @@ export function PostViewer() {
                                                 </div>
                                             ) : (
                                                 <div>
-                                                    <p className="text-blue-400 font-semibold">
+                                                    <p className="text-accent font-semibold">
                                                         {author?.name || "Unknown"}
                                                     </p>
-                                                    <p className="text-xs text-gray-500">
+                                                    <p className="text-xs text-secondary">
                                                         @{author?.username}
                                                     </p>
                                                 </div>
@@ -216,7 +246,7 @@ export function PostViewer() {
 
                                 {/* Post Body */}
                                 <div className="p-6">
-                                    <p className="text-gray-300 leading-relaxed">
+                                    <p className="text-primary leading-relaxed">
                                         {selectedPost.body}
                                     </p>
                                 </div>
@@ -225,10 +255,10 @@ export function PostViewer() {
                             {/* Comments Section */}
                             <section className="mt-8">
                                 <div className="flex items-center gap-2 mb-4">
-                                    <h4 className="text-lg font-semibold text-gray-200">
+                                    <h4 className="text-lg font-semibold text-primary">
                                         💬 Comments
                                     </h4>
-                                    <span className="text-xs px-2 py-1 bg-gray-700 rounded-full text-gray-300">
+                                    <span className="text-xs px-2 py-1 bg-surface rounded-full text-secondary border border-surface">
                                         {comments.length}
                                     </span>
                                 </div>
@@ -238,7 +268,7 @@ export function PostViewer() {
                                         <LoadingSpinner size="md" />
                                     </div>
                                 ) : comments.length === 0 ? (
-                                    <div className="text-center py-8 text-gray-500 bg-gray-800/30 rounded-xl">
+                                    <div className="text-center py-8 text-secondary bg-surface rounded-xl">
                                         No comments yet
                                     </div>
                                 ) : (
@@ -246,7 +276,7 @@ export function PostViewer() {
                                         {comments.map((comment, index) => (
                                             <div
                                                 key={comment.id}
-                                                className="bg-gray-800/40 hover:bg-gray-800/60 transition-all p-4 rounded-xl border border-gray-700 animate-fade-in"
+                                                className="bg-surface hover:bg-surface-strong transition-all p-4 rounded-xl border border-surface animate-fade-in"
                                                 style={{
                                                     animationDelay: `${index * 50}ms`,
                                                     animation: 'fadeInUp 0.3s ease-out forwards',
@@ -254,14 +284,12 @@ export function PostViewer() {
                                                 }}
                                             >
                                                 <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
-                                                    <span className="font-semibold text-blue-400 text-sm">
+                                                    <span className="font-semibold text-accent text-sm">
                                                         {comment.name}
                                                     </span>
-                                                    <span className="text-xs text-gray-500">
-                                                        📧 {comment.email}
-                                                    </span>
+                                                    <span className="text-xs text-secondary">{comment.email}</span>
                                                 </div>
-                                                <p className="text-gray-300 text-sm leading-relaxed">
+                                                <p className="text-primary text-sm leading-relaxed">
                                                     {comment.body}
                                                 </p>
                                             </div>
